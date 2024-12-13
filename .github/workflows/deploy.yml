@@ -1,28 +1,34 @@
-name: Auth with Discord
+name: Deploy to GitHub Pages
 
 on:
   push:
     branches:
-      - main
+      - main  # Specifica il branch da monitorare per il deploy
 
 jobs:
-  auth_job:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
+      - name: Set up Node.js (se necessario)
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '14'  # Specifica la versione di Node.js se usi strumenti come npm o yarn
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run authentication script
-        env:
-          DISCORD_CLIENT_SECRET: ${{ secrets.DISCORD_CLIENT_SECRET }}
+      - name: Install dependencies (se hai bisogno di pacchetti npm o yarn)
         run: |
-          node auth.js
+          npm install  # o yarn install
+
+      - name: Build (se hai un processo di build)
+        run: |
+          npm run build  # o qualsiasi comando di build specifico
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages  # Il branch su cui fare il deploy
+          folder: ./dist  # La cartella contenente i file statici da fare il deploy
+          token: ${{ secrets.DISCORD_CLIENT_SECRET }}  # Usa il token di accesso predefinito di GitHub
