@@ -51,10 +51,10 @@
   <script>
     // La funzione che redirige l'utente a Discord per il login
     function loginWithDiscord() {
-      const clientId = '1317188520456093756';  // Sostituisci con il tuo Client ID di Discord
-      const redirectUri = 'https://stabetrix.github.io/dash.html';  // Sostituisci con il tuo Redirect URI
-      const scope = 'identify';  // Permessi che vuoi richiedere, 'identify' per il nome utente
-      const responseType = 'code';  // Tipo di risposta
+      const clientId = '1317188520456093756';  // Il tuo Client ID di Discord
+      const redirectUri = 'https://stabetrix.github.io/dash.html';  // Il tuo Redirect URI
+      const scope = 'identify';  // Permessi che vuoi richiedere
+      const responseType = 'code';  // Tipo di risposta (codice)
       const discordAuthUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}`;
 
       // Reindirizza l'utente alla pagina di login di Discord
