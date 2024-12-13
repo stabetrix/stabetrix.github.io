@@ -11,24 +11,29 @@
       color: white;
       margin: 0;
       display: flex;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
       height: 100vh;
-      flex-direction: column;
+      padding: 20px;
     }
     .dashboard-container {
-      text-align: center;
       background-color: #2c2f33;
-      padding: 30px;
+      padding: 15px 30px;
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      width: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 800px;
     }
     h1 {
-      margin-bottom: 20px;
+      margin: 0;
+      font-weight: bold;
     }
     p {
-      margin-bottom: 20px;
+      margin: 0;
+      font-weight: bold;
     }
     button {
       padding: 10px 20px;
@@ -41,30 +46,51 @@
     button:hover {
       background-color: #7289da;
     }
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #avatar {
+      border-radius: 50%;
+    }
+    .money {
+      font-size: 18px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
 
   <div class="dashboard-container">
-    <h1>Benvenuto nella Dashboard</h1>
-    <p id="name"></p>
-    <img id="avatar" width="100" height="100" style="border-radius: 50%;" />
-    <button onclick="logout()">Logout</button>
+    <div class="user-info">
+      <h1 id="name">Benvenuto</h1>
+      <img id="avatar" width="50" height="50" />
+    </div>
+    <div class="money">
+      <p id="balance">Saldo: €0.00</p>
+    </div>
+    <div>
+      <button onclick="logout()">Logout</button>
+      <button onclick="downloadFile()">Scarica Dati</button>
+      <input type="file" id="fileInput" onchange="uploadFile(event)" style="display: none;">
+      <button onclick="document.getElementById('fileInput').click()">Carica Dati</button>
+    </div>
   </div>
 
   <script>
+    let userData = {};  // Dati utente, compreso l'ID dell'utente.
+    let userBalances = {};  // Oggetto per memorizzare saldi fittizi
+
     window.onload = () => {
-      // Ottieni il fragment dall'URL
       const fragment = new URLSearchParams(window.location.hash.slice(1));
       const [accessToken, tokenType] = [fragment.get('access_token'), fragment.get('token_type')];
 
-      // Se non c'è accessToken, rimanda l'utente alla pagina di login
       if (!accessToken) {
         window.location.href = '/';
         return;
       }
 
-      // Richiesta API per ottenere i dati dell'utente
       fetch('https://discord.com/api/v10/users/@me', {
         headers: {
           authorization: `${tokenType} ${accessToken}`,
@@ -72,26 +98,62 @@
       })
       .then(result => result.json())
       .then(response => {
-        // Estrai le informazioni dell'utente
         const { username, discriminator, avatar, id } = response;
-        
-        // Imposta il nome dell'utente nella dashboard
-        document.getElementById('name').innerText = `${username}#${discriminator}`;
+        userData = { username, discriminator, avatar, id };
 
-        // Imposta l'avatar dell'utente
-        if (avatar) {
-          document.getElementById("avatar").src = `https://cdn.discordapp.com/avatars/${id}/${avatar}.jpg`;
-        } else {
-          document.getElementById("avatar").src = `https://cdn.discordapp.com/embed/avatars/0.png`;  // Fallback nel caso non ci sia un avatar
-        }
+        // Carica il saldo dell'utente se presente
+        userBalances[userData.id] = userBalances[userData.id] || 100.0;  // Imposta un saldo iniziale di 100
+        updateUI();
       })
       .catch(console.error);
     };
 
-    // Funzione di logout che rimuove il token
+    function updateUI() {
+      document.getElementById('name').innerText = `${userData.username}#${userData.discriminator}`;
+      if (userData.avatar) {
+        document.getElementById("avatar").src = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.jpg`;
+      } else {
+        document.getElementById("avatar").src = `https://cdn.discordapp.com/embed/avatars/0.png`;
+      }
+      document.getElementById('balance').innerText = `Saldo: €${userBalances[userData.id].toFixed(2)}`;
+    }
+
     function logout() {
       localStorage.removeItem('discordAuthToken');
-      window.location.href = '/'; // Reindirizza alla pagina di login
+      window.location.href = '/';
+    }
+
+    function downloadFile() {
+      const userBalanceData = {
+        id: userData.id,
+        money: userBalances[userData.id]
+      };
+      const blob = new Blob([JSON.stringify(userBalanceData, null, 2)], { type: 'application/json' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${userData.id}_money_data.json`;
+      link.click();
+    }
+
+    function uploadFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.id === userData.id) {
+            userBalances[userData.id] = data.money;  // Aggiorna il saldo
+            updateUI();
+          } else {
+            alert('File non valido per questo utente!');
+          }
+        } catch (err) {
+          alert('Errore nel leggere il file!');
+        }
+      };
+      reader.readAsText(file);
     }
   </script>
 
