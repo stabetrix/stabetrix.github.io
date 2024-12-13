@@ -54,20 +54,37 @@
 
   <script>
     window.onload = () => {
-      // Ottieni il fragment dall'URL
-      const fragment = new URLSearchParams(window.location.hash.slice(1));
-      const [accessToken, tokenType] = [fragment.get('access_token'), fragment.get('token_type')];
+      // Recupera il token salvato nel localStorage
+      const storedToken = localStorage.getItem('discordAuthToken');
+      
+      // Se esiste un token nel localStorage, usalo direttamente
+      if (storedToken) {
+        fetchUserData(storedToken);
+      } else {
+        // Se non c'è un token, cerca il token nel frammento dell'URL
+        const fragment = new URLSearchParams(window.location.hash.slice(1));
+        const accessToken = fragment.get('access_token');
+        const tokenType = fragment.get('token_type');
 
-      // Se non c'è accessToken, rimanda l'utente alla pagina di login
-      if (!accessToken) {
-        window.location.href = '/';
-        return;
+        // Se non c'è access_token, rimanda l'utente alla pagina di login
+        if (!accessToken) {
+          window.location.href = '/';
+          return;
+        }
+
+        // Memorizza il token nel localStorage
+        localStorage.setItem('discordAuthToken', `${tokenType} ${accessToken}`);
+
+        // Recupera i dati dell'utente con il nuovo token
+        fetchUserData(accessToken);
       }
+    };
 
-      // Richiesta API per ottenere i dati dell'utente
+    // Funzione per recuperare i dati dell'utente da Discord
+    function fetchUserData(accessToken) {
       fetch('https://discord.com/api/v10/users/@me', {
         headers: {
-          authorization: `${tokenType} ${accessToken}`,
+          authorization: accessToken,
         },
       })
       .then(result => result.json())
@@ -86,11 +103,11 @@
         }
       })
       .catch(console.error);
-    };
+    }
 
     // Funzione di logout che rimuove il token
     function logout() {
-      localStorage.removeItem('discordAuthToken');
+      localStorage.removeItem('discordAuthToken');  // Rimuove il token dal localStorage
       window.location.href = '/'; // Reindirizza alla pagina di login
     }
   </script>
