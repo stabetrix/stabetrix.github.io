@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login con Discord</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #7289da;
+      color: white;
+      margin: 0;
+    }
+    .login-container {
+      text-align: center;
+      background-color: #2c2f33;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 15px 30px;
+      background-color: #7289da;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    button:hover {
+      background-color: #5e73b2;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <h1>Accedi con Discord</h1>
+    <p>Clicca il pulsante qui sotto per fare il login con il tuo account Discord.</p>
+    <button onclick="loginWithDiscord()">Login with Discord</button>
+  </div>
+
+  <script>
+    // La funzione che redirige l'utente a Discord per il login
+    function loginWithDiscord() {
+      const clientId = '1317188520456093756';  // Sostituisci con il tuo Client ID di Discord
+      const redirectUri = 'https://google.com/';  // Sostituisci con il tuo Redirect URI
+      const scope = 'identify';  // Permessi che vuoi richiedere, 'identify' per il nome utente
+      const responseType = 'code';  // Tipo di risposta
+      const discordAuthUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}`;
+
+      // Reindirizza l'utente alla pagina di login di Discord
+      window.location.href = discordAuthUrl;
+    }
+  </script>
+
+</body>
+</html>
