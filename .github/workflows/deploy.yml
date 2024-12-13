@@ -3,32 +3,31 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main  # Specifica il branch da monitorare per il deploy
+      - main  # Trigger per il deploy quando c'è un push sul branch 'main'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout del repository
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Set up Node.js (se necessario)
-        uses: actions/setup-node@v2
+      # Esegui un passo per preparare il codice (eventualmente per la build)
+      - name: Setup Node.js (se necessario)
+        uses: actions/setup-node@v3
         with:
-          node-version: '14'  # Specifica la versione di Node.js se usi strumenti come npm o yarn
+          node-version: '16'  # Usa la versione di Node.js che ti serve
 
-      - name: Install dependencies (se hai bisogno di pacchetti npm o yarn)
-        run: |
-          npm install  # o yarn install
+      # Se vuoi usare il segreto in un altro contesto, esempio nel backend, lo puoi fare così:
+      - name: Print Discord Client Secret (come esempio, non usarlo in produzione)
+        run: echo ${{ secrets.DISCORD_CLIENT_SECRET }}
 
-      - name: Build (se hai un processo di build)
-        run: |
-          npm run build  # o qualsiasi comando di build specifico
-
+      # Deploy su GitHub Pages
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          branch: gh-pages  # Il branch su cui fare il deploy
-          folder: ./dist  # La cartella contenente i file statici da fare il deploy
-          token: ${{ secrets.DISCORD_CLIENT_SECRET }}  # Usa il token di accesso predefinito di GitHub
+          branch: gh-pages   # Il branch di destinazione per il deploy (di solito 'gh-pages')
+          folder: ./         # La cartella da cui fare il deploy (root del progetto)
+          token: ${{ secrets.GITHUB_TOKEN }}  # Usa il token predefinito di GitHub
