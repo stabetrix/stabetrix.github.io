@@ -14,20 +14,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      # Esegui un passo per preparare il codice (eventualmente per la build)
-      - name: Setup Node.js (se necessario)
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'  # Usa la versione di Node.js che ti serve
-
-      # Se vuoi usare il segreto in un altro contesto, esempio nel backend, lo puoi fare così:
-      - name: Print Discord Client Secret (come esempio, non usarlo in produzione)
-        run: echo ${{ secrets.DISCORD_CLIENT_SECRET }}
-
-      # Deploy su GitHub Pages
+      # Esegui il deploy su GitHub Pages
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          branch: gh-pages   # Il branch di destinazione per il deploy (di solito 'gh-pages')
-          folder: ./         # La cartella da cui fare il deploy (root del progetto)
-          token: ${{ secrets.GITHUB_TOKEN }}  # Usa il token predefinito di GitHub
+          branch: gh-pages   # Il branch di destinazione per il deploy
+          folder: ./         # La cartella da cui fare il deploy
+          token: ${{ secrets.DEPLOY_TOKEN }}  # Usa il tuo token di accesso personale
