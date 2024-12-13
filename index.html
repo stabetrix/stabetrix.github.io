@@ -3,17 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login con Discord</title>
+  <title>Login - Discord</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      background-color: #7289da;
+      color: white;
+      margin: 0;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background-color: #7289da;
-      color: white;
-      margin: 0;
+      flex-direction: column;
     }
     .login-container {
       text-align: center;
@@ -21,45 +22,57 @@
       padding: 30px;
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      width: 300px;
     }
     h1 {
       margin-bottom: 20px;
     }
     button {
-      padding: 15px 30px;
-      background-color: #7289da;
+      padding: 10px 20px;
+      background-color: #5e73b2;
       color: white;
       border: none;
       border-radius: 5px;
-      font-size: 16px;
       cursor: pointer;
-      margin-top: 20px;
     }
     button:hover {
-      background-color: #5e73b2;
+      background-color: #7289da;
     }
   </style>
 </head>
 <body>
 
   <div class="login-container">
-    <h1>Accedi con Discord</h1>
-    <p>Clicca il pulsante qui sotto per fare il login con il tuo account Discord.</p>
-    <button onclick="loginWithDiscord()">Login with Discord</button>
+    <h1>Login con Discord</h1>
+    <button onclick="loginWithDiscord()">Login</button>
   </div>
 
   <script>
-    // La funzione che redirige l'utente a Discord per il login
+    // Funzione di login che redirige l'utente verso la pagina di autorizzazione di Discord
     function loginWithDiscord() {
-      const clientId = '1317196184174989392';  // Il tuo Client ID di Discord
-      const redirectUri = 'https://stabetrix.github.io/dash.html';  // Il tuo Redirect URI
-      const scope = 'identify';  // Permessi che vuoi richiedere
-      const responseType = 'token';  // Tipo di risposta (codice)
-      const discordAuthUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}`;
+      const clientId = '1317188520456093756';  // Il tuo Client ID di Discord
+      const redirectUri = 'https://stabetrix.github.io/dash.html';  // La tua URL di reindirizzamento
+      const scope = 'identify';  // Permessi richiesti
 
-      // Reindirizza l'utente alla pagina di login di Discord
-      window.location.href = discordAuthUrl;
+      // Costruisci l'URL di autorizzazione
+      const authUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=${scope}`;
+      
+      // Reindirizza l'utente alla pagina di autorizzazione di Discord
+      window.location.href = authUrl;
     }
+
+    window.onload = () => {
+      // Controlla se il token di accesso è presente nell'URL
+      const fragment = new URLSearchParams(window.location.hash.slice(1));
+      const accessToken = fragment.get('access_token');
+      const tokenType = fragment.get('token_type');
+
+      // Se il token è presente, memorizzalo nel localStorage e reindirizza alla dashboard
+      if (accessToken) {
+        localStorage.setItem('discordAuthToken', `${tokenType} ${accessToken}`);
+        window.location.href = '/dash.html';  // Reindirizza alla dashboard
+      }
+    };
   </script>
 
 </body>
