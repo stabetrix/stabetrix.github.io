@@ -1,23 +1,10 @@
-name: Deploy to GitHub Pages
-
-on:
-  push:
-    branches:
-      - main  # Trigger per il deploy quando c'è un push sul branch 'main'
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      # Checkout del repository
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      # Esegui il deploy su GitHub Pages
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          branch: gh-pages   # Il branch di destinazione per il deploy
-          folder: ./         # La cartella da cui fare il deploy
-          token: ${{ secrets.DEPLOY_TOKEN }}  # Usa il tuo token di accesso personale
+# sample workflow snippet
+steps: 
+  - name: Build and deploy
+    working-directory: ./app
+    run: npm run deploy
+    env:
+      token: ${{ secrets.DEPLOY_TOKEN }}
+       # deploy token is used to build and deploy to a gh-pages branch 
+       # (needs permission to create a branch, build the app and modify that branch, 
+       # push changes to that branch, and deploy to github pages)
