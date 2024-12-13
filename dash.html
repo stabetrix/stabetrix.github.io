@@ -54,7 +54,6 @@
   <script>
     // Funzione di logout che rimuove il token
     function logout() {
-      console.log("Logout in corso...");
       localStorage.removeItem('discordAuthToken');
       window.location.href = 'index.html'; // Reindirizza alla pagina di login
     }
@@ -75,16 +74,49 @@
       }
     }
 
-    // Recupera il codice di autenticazione (access token) dalla query string
+    // Funzione per scambiare il codice di autorizzazione con un access token
+    async function exchangeCodeForToken(code) {
+      const clientId = '1317188520456093756'; // Il tuo Client ID di Discord
+      const clientSecret = 'XnKdSuCL7jr19RJiCoBIIVkoe4PsZhES'; // Il tuo Client Secret (da non condividere in produzione)
+      const redirectUri = 'https://stabetrix.github.io/dash.html'; // L'URL di reindirizzamento
+
+      const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({
+          client_id: clientId,
+          client_secret: clientSecret, 
+          code: code,
+          grant_type: 'authorization_code',
+          redirect_uri: redirectUri
+        })
+      });
+
+      const tokenData = await tokenResponse.json();
+      if (tokenData.access_token) {
+        // Salva il token nel localStorage
+        localStorage.setItem('discordAuthToken', tokenData.access_token);
+        return tokenData.access_token;
+      } else {
+        console.error('Errore durante il recupero del token');
+        return null;
+      }
+    }
+
+    // Recupera il codice di autenticazione dalla query string
     const urlParams = new URLSearchParams(window.location.search);
     const authCode = urlParams.get('code');
 
-    // Se il codice è presente, lo salviamo nel localStorage
+    // Se il codice è presente, scambia il codice per un token
     if (authCode) {
-      localStorage.setItem('discordAuthToken', authCode);
-      fetchUserData(authCode);  // Usa il codice come token per recuperare i dati
+      exchangeCodeForToken(authCode).then(token => {
+        if (token) {
+          fetchUserData(token);
+        }
+      });
     } else {
-      // Se il codice non è presente, proviamo a recuperare il token salvato
       const storedToken = localStorage.getItem('discordAuthToken');
       if (storedToken) {
         fetchUserData(storedToken);
