@@ -47,107 +47,53 @@
 
   <div class="dashboard-container">
     <h1>Benvenuto nella Dashboard</h1>
-    <p id="user-info"></p>
+    <p id="name"></p>
+    <img id="avatar" width="100" height="100" style="border-radius: 50%;" />
     <button onclick="logout()">Logout</button>
   </div>
 
   <script>
-    // Funzione di logout che rimuove il codice di autenticazione e il token
-    function logout() {
-      console.log("Logout in corso...");
-      localStorage.removeItem('discordAuthToken');
-      window.location.href = 'index.html'; // Reindirizza alla pagina di login
-    }
+    window.onload = () => {
+      // Ottieni il fragment dall'URL
+      const fragment = new URLSearchParams(window.location.hash.slice(1));
+      const [accessToken, tokenType] = [fragment.get('access_token'), fragment.get('token_type')];
 
-    // Funzione per scambiare il codice con un token di accesso
-    async function fetchAccessToken(code) {
-      const clientId = '1317188520456093756'; // Il tuo Client ID di Discord
-      const clientSecret = 'XnKdSuCL7jr19RJiCoBIIVkoe4PsZhES'; // Il tuo Client Secret di Discord
-      const redirectUri = 'https://stabetrix.github.io/dash.html'; // Il tuo URL di reindirizzamento
+      // Se non c'è accessToken, rimanda l'utente alla pagina di login
+      if (!accessToken) {
+        window.location.href = '/';
+        return;
+      }
 
-      // Invia una richiesta POST per ottenere il token di accesso
-      const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
-        method: 'POST',
+      // Richiesta API per ottenere i dati dell'utente
+      fetch('https://discord.com/api/v10/users/@me', {
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
+          authorization: `${tokenType} ${accessToken}`,
         },
-        body: new URLSearchParams({
-          client_id: clientId,
-          client_secret: clientSecret,  // Il client secret
-          code: code,
-          grant_type: 'authorization_code',
-          redirect_uri: redirectUri
-        })
-      });
+      })
+      .then(result => result.json())
+      .then(response => {
+        // Estrai le informazioni dell'utente
+        const { username, discriminator, avatar, id } = response;
+        
+        // Imposta il nome dell'utente nella dashboard
+        document.getElementById('name').innerText = `${username}#${discriminator}`;
 
-      const tokenData = await tokenResponse.json();
-      if (tokenData.access_token) {
-        // Salva il token nel localStorage per identificare l'utente al prossimo accesso
-        console.log("Token ottenuto e salvato nel localStorage:", tokenData.access_token);
-        localStorage.setItem('discordAuthToken', tokenData.access_token);
-        return tokenData.access_token;
-      } else {
-        console.error('Errore durante il recupero del token');
-        return null;
-      }
-    }
-
-    // Funzione per recuperare i dati dell'utente da Discord
-
-    // Recupera il codice di autenticazione dalla query string
-    const urlParams = new URLSearchParams(window.location.search);
-    const authCode = urlParams.get('code');
-
-    // Verifica se il codice di autenticazione è presente
-    if (authCode) {
-      console.log("Codice di autenticazione ricevuto:", authCode);
-      fetchAccessToken(authCode).then(token => {
-        if (token) {
-          fetchUserData(token);
+        // Imposta l'avatar dell'utente
+        if (avatar) {
+          document.getElementById("avatar").src = `https://cdn.discordapp.com/avatars/${id}/${avatar}.jpg`;
         } else {
-          window.location.href = 'index.html'; // Se non c'è un token, reindirizza al login
+          document.getElementById("avatar").src = `https://cdn.discordapp.com/embed/avatars/0.png`;  // Fallback nel caso non ci sia un avatar
         }
-      });
-    } else {
-      // Se il codice non è presente, prova a recuperare il token dal localStorage
-      const storedToken = localStorage.getItem('discordAuthToken');
-      if (storedToken) {
-        console.log("Token trovato nel localStorage:", storedToken);
-        fetchUserData(storedToken); // Usa il token salvato nel localStorage
-      } else {
-        console.log("Nessun token trovato, reindirizzamento al login...");
-        window.location.href = 'index.html'; // Se non c'è un token, reindirizza al login
-      }
+      })
+      .catch(console.error);
+    };
+
+    // Funzione di logout che rimuove il token
+    function logout() {
+      localStorage.removeItem('discordAuthToken');
+      window.location.href = '/'; // Reindirizza alla pagina di login
     }
   </script>
-<script>
-  window.onload = () => {
-    const fragment = new URLSearchParams(window.location.hash.slice(1));
-    const [accessToken, tokenType] = [fragment.get('access_token'), fragment.get('token_type')];
 
-    if (!accessToken) {
-        window.location.href('/')
-    }
-
-    fetch('https://discord.com/api/users/@me', {
-    headers: {
-        authorization: `${tokenType} ${accessToken}`,
-    },
-    })
-    .then(result => result.json())
-    .then(response => {
-        console.log(response);
-        const { username, discriminator, avatar, id} = response;
-        //set the welcome username string
-        document.getElementById('user-info').textContent = `Ciao, ${userData.username}#${userData.discriminator}`;
-
-        //set the avatar image by constructing a url to access discord's cdn
-        document.getElementById("avatar").src = `https://cdn.discordapp.com/avatars/${id}/${avatar}.jpg`;
-    })
-    .catch(console.error);
-
-
-};
-</script>
 </body>
 </html>
