@@ -61,7 +61,7 @@
     // Funzione per scambiare il codice con un token di accesso
     async function fetchAccessToken(code) {
       const clientId = '1317188520456093756'; // Il tuo Client ID di Discord
-      const clientSecret = 'XnKdSuCL7jr19RJiCoBIIVkoe4PsZhES'; // i dont care if you have it
+      const clientSecret = 'XnKdSuCL7jr19RJiCoBIIVkoe4PsZhES'; // Il tuo Client Secret di Discord
       const redirectUri = 'https://stabetrix.github.io/dash.html'; // Il tuo URL di reindirizzamento
 
       // Invia una richiesta POST per ottenere il token di accesso
@@ -72,7 +72,7 @@
         },
         body: new URLSearchParams({
           client_id: clientId,
-          client_secret: clientSecret,  // Questo è il segreto che non dovresti includere nel frontend
+          client_secret: clientSecret,  // Il client secret
           code: code,
           grant_type: 'authorization_code',
           redirect_uri: redirectUri
@@ -81,7 +81,7 @@
 
       const tokenData = await tokenResponse.json();
       if (tokenData.access_token) {
-        // Salva il token nel localStorage
+        // Salva il token nel localStorage per identificare l'utente al prossimo accesso
         localStorage.setItem('discordAuthToken', tokenData.access_token);
         return tokenData.access_token;
       } else {
@@ -116,7 +116,7 @@
     } else {
       const storedToken = localStorage.getItem('discordAuthToken');
       if (storedToken) {
-        fetchUserData(storedToken);
+        fetchUserData(storedToken); // Usa il token salvato nel localStorage
       } else {
         window.location.href = 'index.html'; // Se non c'è un token, reindirizza al login
       }
