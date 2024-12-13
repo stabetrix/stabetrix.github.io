@@ -72,15 +72,17 @@
     </div>
     <div>
       <button onclick="logout()">Logout</button>
-      <button onclick="downloadFile()">Scarica Dati</button>
-      <input type="file" id="fileInput" onchange="uploadFile(event)" style="display: none;">
-      <button onclick="document.getElementById('fileInput').click()">Carica Dati</button>
     </div>
   </div>
 
   <script>
     let userData = {};  // Dati utente, compreso l'ID dell'utente.
-    let userBalances = {};  // Oggetto per memorizzare saldi fittizi
+    
+    // Saldi predefiniti per gli utenti (questi sono i saldi che puoi modificare direttamente nel codice)
+    const userBalances = {
+      "123456789": 150.0,  // Saldo per l'utente con ID 123456789
+      "987654321": 200.5   // Saldo per l'utente con ID 987654321
+    };
 
     window.onload = () => {
       const fragment = new URLSearchParams(window.location.hash.slice(1));
@@ -101,59 +103,26 @@
         const { username, discriminator, avatar, id } = response;
         userData = { username, discriminator, avatar, id };
 
-        // Carica il saldo dell'utente se presente
-        userBalances[userData.id] = userBalances[userData.id] || 100.0;  // Imposta un saldo iniziale di 100
-        updateUI();
+        // Aggiorna il saldo dell'utente con i dati predefiniti
+        const userBalance = userBalances[userData.id] || 0;  // Se l'ID non è trovato, imposta un saldo di 0
+        updateUI(userBalance);
       })
       .catch(console.error);
     };
 
-    function updateUI() {
+    function updateUI(balance) {
       document.getElementById('name').innerText = `${userData.username}#${userData.discriminator}`;
       if (userData.avatar) {
         document.getElementById("avatar").src = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.jpg`;
       } else {
         document.getElementById("avatar").src = `https://cdn.discordapp.com/embed/avatars/0.png`;
       }
-      document.getElementById('balance').innerText = `Saldo: €${userBalances[userData.id].toFixed(2)}`;
+      document.getElementById('balance').innerText = `Saldo: €${balance.toFixed(2)}`;
     }
 
     function logout() {
       localStorage.removeItem('discordAuthToken');
       window.location.href = '/';
-    }
-
-    function downloadFile() {
-      const userBalanceData = {
-        id: userData.id,
-        money: userBalances[userData.id]
-      };
-      const blob = new Blob([JSON.stringify(userBalanceData, null, 2)], { type: 'application/json' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `${userData.id}_money_data.json`;
-      link.click();
-    }
-
-    function uploadFile(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const data = JSON.parse(e.target.result);
-          if (data.id === userData.id) {
-            userBalances[userData.id] = data.money;  // Aggiorna il saldo
-            updateUI();
-          } else {
-            alert('File non valido per questo utente!');
-          }
-        } catch (err) {
-          alert('Errore nel leggere il file!');
-        }
-      };
-      reader.readAsText(file);
     }
   </script>
 
