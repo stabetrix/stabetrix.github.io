@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Benvenuto, utente!</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #2c2f33;
+      color: white;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+    }
+    .user-info {
+      background-color: #7289da;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+    .user-info img {
+      border-radius: 50%;
+      width: 100px;
+      height: 100px;
+      margin-bottom: 20px;
+    }
+    .user-info h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+    .user-info p {
+      font-size: 18px;
+      margin: 5px 0;
+    }
+    .logout-button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      background-color: #ff4747;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .logout-button:hover {
+      background-color: #d43f3f;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="user-info">
+      <img id="avatar" src="" alt="Avatar">
+      <h2 id="username">Caricamento...</h2>
+      <p id="user-id"></p>
+      <button class="logout-button" onclick="logout()">Esci</button>
+    </div>
+  </div>
+
+  <script>
+    // Funzione per caricare i dati dell'utente
+    async function loadUserData() {
+      try {
+        const response = await fetch('/api/user', {  // Aggiungi l'endpoint del tuo backend
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}` // Passa il token di accesso
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Impossibile recuperare i dati dell\'utente');
+        }
+
+        const userData = await response.json();
+
+        // Aggiorna la UI con i dati dell'utente
+        document.getElementById('avatar').src = userData.avatar_url;
+        document.getElementById('username').textContent = userData.username;
+        document.getElementById('user-id').textContent = `ID: ${userData.id}`;
+      } catch (error) {
+        console.error('Errore nel caricare i dati dell\'utente:', error);
+        document.getElementById('username').textContent = 'Errore nel recuperare i dati';
+      }
+    }
+
+    // Funzione per il logout (rimuovere il token di accesso)
+    function logout() {
+      localStorage.removeItem('accessToken');
+      window.location.href = '/';  // Reindirizza alla home page o login
+    }
+
+    // Carica i dati quando la pagina è pronta
+    window.onload = loadUserData;
+  </script>
+
+</body>
+</html>
